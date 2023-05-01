@@ -17,6 +17,9 @@ apply plugin: 'com.facebook.react'
 android {
   compileSdkVersion safeExtGet('compileSdkVersion', 33)
   namespace "com.infinitered.rtnorientation"
+  defaultConfig {
+    minSdk 21
+  }
 }
 
 repositories {
