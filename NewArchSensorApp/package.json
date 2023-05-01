@@ -12,6 +12,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "orientation-sensor": "../SensorModule",
     "react": "18.2.0",
     "react-native": "0.71.7"
   },
