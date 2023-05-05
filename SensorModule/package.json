@@ -2,8 +2,7 @@
   "name": "orientation-sensor",
   "version": "0.0.1",
   "description": "Get orientation data from phone sensor",
-  "react-native": "src/index",
-  "source": "src/index",
+  "main": "src/NativeOrientation.ts",
   "files": [
     "src",
     "android",
