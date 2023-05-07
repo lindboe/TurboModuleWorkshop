@@ -1,3 +1,4 @@
+#import <CoreMotion/CoreMotion.h>
 #import <RTNOrientationSpec/RTNOrientationSpec.h>
 
 NS_ASSUME_NONNULL_BEGIN
