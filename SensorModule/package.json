@@ -15,7 +15,13 @@
     "!**/__mocks__"
   ],
   "keywords": ["react-native", "ios", "android"],
+  "repository": "https://github.com/lindboe/TMWorkshop",
+  "author": "Lizzi Lindboe (https://github.com/lindboe)",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lindboe/TMWorkshop/issues"
+  },
+  "homepage": "https://github.com/lindboe/TMWorkshop",
   "devDependencies": {},
   "peerDependencies": {
     "react": "*",
