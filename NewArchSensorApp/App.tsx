@@ -3,6 +3,10 @@ import RTNOrientation from 'orientation-sensor';
 import {SafeAreaView} from 'react-native';
 import {DemoText, DemoPressable} from './src/DemoComponents';
 
+function isError(e: unknown): e is Error {
+  return typeof e === 'object' && e !== null && 'message' in e;
+}
+
 function App(): JSX.Element {
   const [sensorOn, setSensorOn] = useState(false);
   const [sensorData, setSensorData] = useState({
@@ -26,9 +30,13 @@ function App(): JSX.Element {
   const getLastOrientation = useCallback(() => {
     if (RTNOrientation) {
       const fn = async () => {
-        // @ts-ignore
-        const last = await RTNOrientation.getLastRecordedOrientation();
-        setSensorData(last);
+        try {
+          // @ts-ignore
+          const last = await RTNOrientation.getLastRecordedOrientation();
+          setSensorData(last);
+        } catch (e) {
+          console.log("Couldn't get sensor data: ", isError(e) ? e.message : e);
+        }
       };
       fn();
     }
