@@ -7,9 +7,17 @@ function isError(e: unknown): e is Error {
   return typeof e === 'object' && e !== null && 'message' in e;
 }
 
+const initialState = {
+  pitch: undefined,
+  roll: undefined,
+  yaw: undefined,
+} as const;
+
 function App(): JSX.Element {
   const [sensorOn, setSensorOn] = useState(false);
-  const [sensorData, setSensorData] = useState<Partial<OrientationData>>({
+  const [sensorData, setSensorData] = useState<
+    OrientationData | typeof initialState
+  >({
     pitch: undefined,
     roll: undefined,
     yaw: undefined,
