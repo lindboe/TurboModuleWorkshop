@@ -2,7 +2,7 @@
   "name": "orientation-sensor",
   "version": "0.0.1",
   "description": "Get orientation data from phone sensor",
-  "main": "src/NativeOrientation.ts",
+  "main": "src/index.ts",
   "files": [
     "src",
     "android",

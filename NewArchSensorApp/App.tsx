@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import RTNOrientation from 'orientation-sensor';
+import RTNOrientation, {OrientationData} from 'orientation-sensor';
 import {SafeAreaView} from 'react-native';
 import {DemoText, DemoPressable} from './src/DemoComponents';
 
@@ -9,7 +9,7 @@ function isError(e: unknown): e is Error {
 
 function App(): JSX.Element {
   const [sensorOn, setSensorOn] = useState(false);
-  const [sensorData, setSensorData] = useState({
+  const [sensorData, setSensorData] = useState<Partial<OrientationData>>({
     pitch: undefined,
     roll: undefined,
     yaw: undefined,
