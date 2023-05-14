@@ -15,4 +15,4 @@ export interface Spec extends TurboModule {
   getLastRecordedOrientation(): Promise<{yaw: number, pitch: number, roll: number}>;
 }
 
-export default TurboModuleRegistry.get<Spec>('RTNOrientation');
+export default TurboModuleRegistry.get<Spec>('RTNNotAModule');

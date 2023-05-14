@@ -16,36 +16,32 @@ function App(): JSX.Element {
   });
 
   const toggleEvents = useCallback(() => {
-    if (RTNOrientation) {
-      if (sensorOn) {
-        RTNOrientation.stopSensor();
-        setSensorOn(false);
-      } else {
-        RTNOrientation.startSensor();
-        setSensorOn(true);
-      }
+    if (sensorOn) {
+      RTNOrientation.stopSensor();
+      setSensorOn(false);
+    } else {
+      RTNOrientation.startSensor();
+      setSensorOn(true);
     }
   }, [sensorOn]);
 
   const getLastOrientation = useCallback(() => {
-    if (RTNOrientation) {
-      const fn = async () => {
-        try {
-          // @ts-ignore
-          const last = await RTNOrientation.getLastRecordedOrientation();
-          setSensorData(last);
-        } catch (e) {
-          console.log("Couldn't get sensor data: ", isError(e) ? e.message : e);
-        }
-      };
-      fn();
-    }
+    const fn = async () => {
+      try {
+        const last = await RTNOrientation.getLastRecordedOrientation();
+        setSensorData(last);
+      } catch (e) {
+        console.log("Couldn't get sensor data: ", isError(e) ? e.message : e);
+      }
+    };
+    fn();
   }, []);
 
   // ensure sensor stops
-  // @ts-ignore
   useEffect(() => {
-    return () => RTNOrientation?.stopSensor();
+    return () => {
+      RTNOrientation.stopSensor();
+    };
   }, []);
 
   return (
