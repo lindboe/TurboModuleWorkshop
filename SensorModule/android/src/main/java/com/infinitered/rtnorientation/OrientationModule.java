@@ -4,24 +4,29 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.SystemClock;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 // don't technically need this, same package
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.infinitered.rtnorientation.NativeOrientationSpec;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.Arguments;
 
 public class OrientationModule extends NativeOrientationSpec implements SensorEventListener {
+    // Based on https://github.com/react-native-sensors/react-native-sensors
     private final ReactApplicationContext reactContext;
     public static String NAME = "RTNOrientation";
     private final SensorManager sensorManager;
     private final Sensor sensor;
-    private float yaw;
-    private float pitch;
-    private float roll;
-    private boolean sensorOn = false;
+    private double lastReading = (double) System.currentTimeMillis();
+    private int interval = 1000;
+    private String eventName = "orientation";
 
     OrientationModule(ReactApplicationContext context) {
         super(context);
@@ -37,48 +42,44 @@ public class OrientationModule extends NativeOrientationSpec implements SensorEv
     }
 
     @Override
-    public void startSensor(Promise promise) {
-        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI);
-        sensorOn = true;
+    public void addListener(String requestedEventName) {
+        // kind of silly, but helps ensure event names are consistent across platforms
+        eventName = requestedEventName;
+        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
-    public void stopSensor(Promise promise) {
+    public void removeListeners(double count) {
         sensorManager.unregisterListener(this);
-        sensorOn = false;
     }
 
-    @Override
-    public void getLastRecordedOrientation(Promise promise) {
-        // if it's set, resolve; if no value, reject with error string
-        if (sensorOn == true) {
-            WritableMap toSend = Arguments.createMap();
-            // no guarantees these values are all from the same event :/
-            toSend.putDouble("yaw", yaw);
-            toSend.putDouble("pitch", pitch);
-            toSend.putDouble("roll", roll);
-            promise.resolve(toSend);
-        } else {
-            promise.reject("Orientation Error", "Sensor is not enabled. Did you start the sensor with `startSensor`?");
+    private void sendEvent(String eventName, @Nullable WritableMap params) {
+        try {
+            this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                    .emit(eventName, params);
+        } catch (RuntimeException e) {
+            Log.e("ERROR", "java.lang.RuntimeException: Trying to invoke Javascript before CatalystInstance has been set!");
         }
     }
 
-    @Override
-    public WritableMap getLastRecordedOrientationSync() {
-        WritableMap toSend = Arguments.createMap();
-        toSend.putDouble("yaw", yaw);
-        toSend.putDouble("pitch", pitch);
-        toSend.putDouble("roll", roll);
-        return toSend;
+    private static double sensorTimestampToEpochMilliseconds(long elapsedTime) {
+        // elapsedTime = The time in nanoseconds at which the event happened.
+        return System.currentTimeMillis() + ((elapsedTime- SystemClock.elapsedRealtimeNanos())/1000000L);
     }
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
-        // store most recent value in local state so it can be fetched on-demand
-        yaw = sensorEvent.values[0];
-        pitch = sensorEvent.values[1];
-        roll = sensorEvent.values[2];
+        double tempMs = (double) System.currentTimeMillis();
+        if (tempMs - lastReading >= interval) {
+            lastReading = tempMs;
+            WritableMap map = Arguments.createMap();
+            map.putDouble("yaw", sensorEvent.values[0]);
+            map.putDouble("pitch", sensorEvent.values[1]);
+            map.putDouble("roll", sensorEvent.values[2]);
+            this.sendEvent("orientation", map);
+        }
     }
+
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
