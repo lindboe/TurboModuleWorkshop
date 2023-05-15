@@ -1,60 +1,27 @@
 import NativeOrientation, {Spec} from './NativeOrientation';
-import type {TurboModule} from 'react-native';
+import {
+  NativeEventEmitter,
+} from 'react-native';
 
-function isNum(input: unknown) {
-  return typeof input === 'number';
-}
-
+// Data sent in the native event
 export type OrientationData = {
   yaw: number,
   pitch: number,
   roll: number
 }
 
-export interface PreciseSpec extends TurboModule {
-  startSensor(): Promise<void>;
-  stopSensor(): Promise<void>;
-  getLastRecordedOrientation(): Promise<OrientationData>;
-  getLastRecordedOrientationSync(): OrientationData;
-}
-
-
-function verifyData(data: any): data is OrientationData {
-  return isNum(data?.['yaw']) && isNum(data?.['pitch']) && isNum(data?.['roll']);
-}
-
-async function getLastRecordedOrientationTypeChecked() {
-    const result = await NativeOrientation.getLastRecordedOrientation();
-    if (!verifyData(result)) {
-      throw new Error(`Data from NativeOrientation could not be validated: ${result}`);
-    } else {
-      return result;
-    }
-}
-
-function getLastRecordedOrientationSyncTypeChecked() {
-    const result = NativeOrientation.getLastRecordedOrientationSync();
-    if (!verifyData(result)) {
-      throw new Error(`Data from NativeOrientation could not be validated: ${result}`);
-    } else {
-      return result;
-    }
-}
-
-let RTNOrientation: PreciseSpec;
+let RTNOrientation: NativeEventEmitter;
 
 if (NativeOrientation === null) {
    console.error("NativeOrientation module could not be loaded.");
-   // cast so we don't have to keep using safe access in the app; assigning it to be an empty object will prevent access errors
-   RTNOrientation = {} as PreciseSpec;
+   // Add "empty" versions of the methods so calls won't error
+   RTNOrientation = {
+    addListener: (...rest: any) => null,
+    removeListeners: (...rest: any) => null,
+   };
 } else {
   // cast so we don't have to keep using safe access
-  RTNOrientation = {
-    startSensor: NativeOrientation.startSensor,
-    stopSensor: NativeOrientation.stopSensor,
-    getLastRecordedOrientation: getLastRecordedOrientationTypeChecked,
-    getLastRecordedOrientationSync: getLastRecordedOrientationSyncTypeChecked,
-  } as PreciseSpec;
+  RTNOrientation = new NativeEventEmitter(NativeOrientation);
 }
 
 export default RTNOrientation;
