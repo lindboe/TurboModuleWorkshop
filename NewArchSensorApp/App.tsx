@@ -1,13 +1,7 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
 import React, {useCallback, useEffect, useState} from 'react';
-import {Button, SafeAreaView, Text} from 'react-native';
 import RTNOrientation from 'orientation-sensor';
+import {SafeAreaView} from 'react-native';
+import {DemoText, DemoPressable} from './src/DemoComponents';
 
 function App(): JSX.Element {
   const [sensorOn, setSensorOn] = useState(false);
@@ -54,16 +48,16 @@ function App(): JSX.Element {
         justifyContent: 'center',
         alignItems: 'center',
       }}>
-      <Button title={'Toggle events'} onPress={toggleEvents} />
-      <Button title={'Get last orientation'} onPress={getLastOrientation} />
-      <Text>Sensor on:</Text>
-      <Text>{JSON.stringify(sensorOn)}</Text>
-      <Text>Roll</Text>
-      <Text>{sensorData.roll}</Text>
-      <Text>Pitch</Text>
-      <Text>{sensorData.pitch}</Text>
-      <Text>Yaw</Text>
-      <Text>{sensorData.yaw}</Text>
+      <DemoPressable text="Toggle events" onPress={toggleEvents} />
+      <DemoPressable text="Get last orientation" onPress={getLastOrientation} />
+      <DemoText>Sensor on:</DemoText>
+      <DemoText>{JSON.stringify(sensorOn)}</DemoText>
+      <DemoText>Roll</DemoText>
+      <DemoText>{sensorData.roll}</DemoText>
+      <DemoText>Pitch</DemoText>
+      <DemoText>{sensorData.pitch}</DemoText>
+      <DemoText>Yaw</DemoText>
+      <DemoText>{sensorData.yaw}</DemoText>
     </SafeAreaView>
   );
 }
