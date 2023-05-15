@@ -15,6 +15,7 @@ export interface PreciseSpec extends TurboModule {
   startSensor(): Promise<void>;
   stopSensor(): Promise<void>;
   getLastRecordedOrientation(): Promise<OrientationData>;
+  getLastRecordedOrientationSync(): OrientationData;
 }
 
 
@@ -22,8 +23,17 @@ function verifyData(data: any): data is OrientationData {
   return isNum(data?.['yaw']) && isNum(data?.['pitch']) && isNum(data?.['roll']);
 }
 
-export async function getLastRecordedOrientationTypeChecked() {
+async function getLastRecordedOrientationTypeChecked() {
     const result = await NativeOrientation.getLastRecordedOrientation();
+    if (!verifyData(result)) {
+      throw new Error(`Data from NativeOrientation could not be validated: ${result}`);
+    } else {
+      return result;
+    }
+}
+
+function getLastRecordedOrientationSyncTypeChecked() {
+    const result = NativeOrientation.getLastRecordedOrientationSync();
     if (!verifyData(result)) {
       throw new Error(`Data from NativeOrientation could not be validated: ${result}`);
     } else {
@@ -43,6 +53,7 @@ if (NativeOrientation === null) {
     startSensor: NativeOrientation.startSensor,
     stopSensor: NativeOrientation.stopSensor,
     getLastRecordedOrientation: getLastRecordedOrientationTypeChecked,
+    getLastRecordedOrientationSync: getLastRecordedOrientationSyncTypeChecked,
   } as PreciseSpec;
 }
 

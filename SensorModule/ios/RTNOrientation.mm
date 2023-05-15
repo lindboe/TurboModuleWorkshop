@@ -42,6 +42,11 @@ RCT_EXPORT_MODULE()
     
 }
 
+- (NSDictionary *)getLastRecordedOrientationSync {
+    NSDictionary* toSend = @{@"yaw":@(self->yaw), @"pitch":@(self->pitch), @"roll":@(self->roll)};
+    return toSend;
+}
+
 - (void)startSensor:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
     NSLog(@"Starting sensor");
     [self->_motionManager setShowsDeviceMovementDisplay:YES];

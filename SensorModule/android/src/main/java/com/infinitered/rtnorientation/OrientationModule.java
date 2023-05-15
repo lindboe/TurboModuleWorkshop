@@ -64,6 +64,15 @@ public class OrientationModule extends NativeOrientationSpec implements SensorEv
     }
 
     @Override
+    public WritableMap getLastRecordedOrientationSync() {
+        WritableMap toSend = Arguments.createMap();
+        toSend.putDouble("yaw", yaw);
+        toSend.putDouble("pitch", pitch);
+        toSend.putDouble("roll", roll);
+        return toSend;
+    }
+
+    @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         // store most recent value in local state so it can be fetched on-demand
         yaw = sensorEvent.values[0];

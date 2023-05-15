@@ -45,6 +45,11 @@ function App(): JSX.Element {
     fn();
   }, []);
 
+  const getLastOrientationSync = useCallback(() => {
+    const last = RTNOrientation.getLastRecordedOrientationSync();
+    setSensorData(last);
+  }, []);
+
   // ensure sensor stops
   useEffect(() => {
     return () => {
@@ -62,6 +67,10 @@ function App(): JSX.Element {
       }}>
       <DemoPressable text="Toggle events" onPress={toggleEvents} />
       <DemoPressable text="Get last orientation" onPress={getLastOrientation} />
+      <DemoPressable
+        text="Get last orientation: synchronous"
+        onPress={getLastOrientationSync}
+      />
       <DemoText>Sensor on:</DemoText>
       <DemoText>{JSON.stringify(sensorOn)}</DemoText>
       <DemoText>Roll</DemoText>
