@@ -1,17 +1,15 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import RTNOrientation, {OrientationData} from 'orientation-sensor';
 import {SafeAreaView} from 'react-native';
 import {DemoText, DemoPressable} from './src/DemoComponents';
-
-function isError(e: unknown): e is Error {
-  return typeof e === 'object' && e !== null && 'message' in e;
-}
 
 const initialState = {
   pitch: undefined,
   roll: undefined,
   yaw: undefined,
 } as const;
+
+const EVENT_NAME = 'orientation';
 
 function App(): JSX.Element {
   const [sensorOn, setSensorOn] = useState(false);
@@ -25,37 +23,16 @@ function App(): JSX.Element {
 
   const toggleEvents = useCallback(() => {
     if (sensorOn) {
-      RTNOrientation.stopSensor();
+      RTNOrientation.removeAllListeners(EVENT_NAME);
+      setSensorData({pitch: undefined, roll: undefined, yaw: undefined});
       setSensorOn(false);
     } else {
-      RTNOrientation.startSensor();
+      RTNOrientation.addListener(EVENT_NAME, event => {
+        setSensorData(event);
+      });
       setSensorOn(true);
     }
   }, [sensorOn]);
-
-  const getLastOrientation = useCallback(() => {
-    const fn = async () => {
-      try {
-        const last = await RTNOrientation.getLastRecordedOrientation();
-        setSensorData(last);
-      } catch (e) {
-        console.log("Couldn't get sensor data: ", isError(e) ? e.message : e);
-      }
-    };
-    fn();
-  }, []);
-
-  const getLastOrientationSync = useCallback(() => {
-    const last = RTNOrientation.getLastRecordedOrientationSync();
-    setSensorData(last);
-  }, []);
-
-  // ensure sensor stops
-  useEffect(() => {
-    return () => {
-      RTNOrientation.stopSensor();
-    };
-  }, []);
 
   return (
     <SafeAreaView
@@ -66,11 +43,6 @@ function App(): JSX.Element {
         alignItems: 'center',
       }}>
       <DemoPressable text="Toggle events" onPress={toggleEvents} />
-      <DemoPressable text="Get last orientation" onPress={getLastOrientation} />
-      <DemoPressable
-        text="Get last orientation: synchronous"
-        onPress={getLastOrientationSync}
-      />
       <DemoText>Sensor on:</DemoText>
       <DemoText>{JSON.stringify(sensorOn)}</DemoText>
       <DemoText>Roll</DemoText>
