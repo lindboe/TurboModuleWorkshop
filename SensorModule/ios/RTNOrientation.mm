@@ -4,9 +4,6 @@
 @implementation RTNOrientation {
     CMMotionManager *_motionManager;
     bool sensorOn;
-    double yaw;
-    double pitch;
-    double roll;
 }
 
 RCT_EXPORT_MODULE()
@@ -17,6 +14,11 @@ RCT_EXPORT_MODULE()
     return std::make_shared<facebook::react::NativeOrientationSpecJSI>(params);
 }
 
+
+- (NSArray<NSString *> *)supportedEvents
+{
+    return @[ @"orientation" ];
+}
 
 - (id) init {
     self = [super init];
@@ -32,43 +34,37 @@ RCT_EXPORT_MODULE()
     return NO;
 }
 
-- (void)getLastRecordedOrientation:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    if (sensorOn) {
-      NSDictionary* toSend = @{@"yaw":@(self->yaw), @"pitch":@(self->pitch), @"roll":@(self->roll)};
-      resolve(toSend);
-    } else {
-      reject(@"Orientation Error", @"Sensor is not enabled. Did you start the sensor with `startSensor`?", nil);
-    }
-    
+- (void)stopSensor:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    [self->_motionManager stopDeviceMotionUpdates];
+    sensorOn = false;
 }
 
-- (NSDictionary *)getLastRecordedOrientationSync {
-    NSDictionary* toSend = @{@"yaw":@(self->yaw), @"pitch":@(self->pitch), @"roll":@(self->roll)};
-    return toSend;
-}
-
-- (void)startSensor:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    NSLog(@"Starting sensor");
+// addListener and removeAllListeners are handled by RCTEventEmitter.
+// startObserving and stopObserving define what do when they're called.
+- (void)startObserving {
     [self->_motionManager setShowsDeviceMovementDisplay:YES];
+    [self->_motionManager setDeviceMotionUpdateInterval:1];
+    
     /* Receive the orientation data on this block */
     NSOperationQueue *queue = [[NSOperationQueue alloc] init];
-    RTNOrientation * __weak weakSelf = self;
     [self->_motionManager startDeviceMotionUpdatesToQueue:queue withHandler:^(CMDeviceMotion *deviceMotion, NSError *error)
      {
         CMAttitude *attitude = deviceMotion.attitude;
         
-        self->pitch = attitude.pitch;
-        self->roll = attitude.roll;
-        self->yaw = attitude.yaw;
+        double pitch = attitude.pitch;
+        double roll = attitude.roll;
+        double yaw = attitude.yaw;
+        
+        [self sendEventWithName:@"orientation" body:@{
+            @"pitch" : [NSNumber numberWithDouble:pitch],
+            @"roll" : [NSNumber numberWithDouble:roll],
+            @"yaw" : [NSNumber numberWithDouble:yaw],
+        }];
     }];
-    sensorOn = true;
-    
 }
 
-
-- (void)stopSensor:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+- (void)stopObserving {
     [self->_motionManager stopDeviceMotionUpdates];
-    sensorOn = false;
 }
 
 @end
